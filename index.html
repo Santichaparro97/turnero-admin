@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Turnero · Panel del barbero</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Oswald:wght@300;400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.7.0/dist/tabler-icons.min.css" rel="stylesheet">
+<style>
+  :root{--bg:#0a0805;--s1:#141009;--s2:#1b150d;--gold:#D4AF37;--gold2:#E9C766;--golddim:#7d6a30;--txt:#F2ECE0;--dim:#9a8f7d;--line:rgba(212,175,55,0.20);--green:#39FF14;}
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  body{margin:0;min-height:100vh;background:#000;font-family:'Inter',sans-serif;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:22px 0;gap:12px;overflow-x:hidden;}
+  body::before{content:"";position:fixed;inset:0;background:radial-gradient(circle at 50% 0%,#1a140a,#000 72%);}
+  .tag{font-family:'Oswald';letter-spacing:6px;font-size:11px;color:var(--golddim);text-transform:uppercase;z-index:1;}
+  #phone{position:relative;z-index:1;width:392px;height:800px;background:var(--bg);border:1px solid var(--line);border-radius:32px;overflow:hidden;color:var(--txt);box-shadow:0 40px 120px rgba(0,0,0,.8);display:flex;flex-direction:column;}
+  #head{flex:none;display:flex;align-items:center;gap:11px;padding:16px 18px 12px;border-bottom:1px solid var(--line);}
+  #screen{flex:1;overflow-y:auto;scrollbar-width:none;padding:14px 16px 22px;}
+  #screen::-webkit-scrollbar{display:none;}
+  #nav{flex:none;display:flex;border-top:1px solid var(--line);background:#0c0a06;}
+  #nav button{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:9px 0 11px;color:var(--dim);font-size:9px;font-family:'Oswald';letter-spacing:1px;text-transform:uppercase;}
+  #nav button.on{color:var(--gold2);}
+  #nav button.on i{color:var(--gold);}
+  #nav i{font-size:21px;}
+  button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit;}
+  input,select{font-family:'Inter';outline:none;background:var(--s1);border:1px solid var(--line);border-radius:9px;padding:10px 11px;color:var(--txt);font-size:14px;}
+  input:focus,select:focus{border-color:var(--gold);}
+  .disp{font-family:'Bebas Neue';letter-spacing:1px;line-height:.95;}
+  .lab{font-family:'Oswald';font-weight:500;letter-spacing:2px;text-transform:uppercase;}
+  .card{background:var(--s1);border:1px solid var(--line);border-radius:14px;}
+  .gbtn{background:linear-gradient(100deg,var(--golddim),var(--gold2) 55%,var(--golddim));color:#0a0805;font-family:'Oswald';font-weight:600;letter-spacing:1px;text-transform:uppercase;border-radius:10px;}
+  .pill{font-family:'Oswald';letter-spacing:1px;text-transform:uppercase;font-size:11px;padding:8px 13px;border-radius:20px;border:1px solid var(--line);color:var(--dim);background:transparent;}
+  .pill.on{background:var(--gold);color:#0a0805;border-color:var(--gold);}
+  .up{animation:up .28s cubic-bezier(.22,1,.36,1);}@keyframes up{0%{transform:translateY(14px);opacity:0}100%{transform:translateY(0);opacity:1}}
+  .sw{width:42px;height:24px;border-radius:14px;background:#2a2218;border:1px solid var(--line);position:relative;flex:none;transition:background .2s;}
+  .sw.on{background:var(--gold);}
+  .sw::after{content:"";position:absolute;top:2px;left:2px;width:18px;height:18px;border-radius:50%;background:#0a0805;transition:left .2s;}
+  .sw.on::after{left:20px;background:#1b150d;}
+  .hbar{height:8px;border-radius:5px;background:#0a0805;border:1px solid var(--line);overflow:hidden;}
+  .hbar>div{height:100%;background:linear-gradient(90deg,var(--golddim),var(--gold2));}
+  @media (max-width:600px){
+    body{padding:0;gap:0;min-height:100dvh;}
+    .tag{display:none;}
+    #phone{width:100vw;height:100dvh;border-radius:0;border:none;box-shadow:none;}
+  }
+</style>
+</head>
+<body>
+  <div class="tag">turnero · panel</div>
+  <div id="phone">
+    <div id="head"></div>
+    <div id="screen"></div>
+    <div id="nav"></div>
+  </div>
+
+<script>
+(function(){
+  var screen=document.getElementById("screen"),head=document.getElementById("head"),nav=document.getElementById("nav");
+  var DAYS=["Lun","Mar","Mié","Jue","Vie","Sáb","Dom"];
+  function sched(){return DAYS.map(function(d,i){return {on:i<6,from:"10:00",to:i===5?"18:00":"20:00"};});}
+  var barbers=[{n:"Tomás",h:"fades & diseños",on:true,sc:sched()},{n:"Nico",h:"clásico & barba",on:true,sc:sched()},{n:"Joaco",h:"urbano & color",on:false,sc:sched()}];
+  var services=[{n:"Corte",p:"6000",d:"30"},{n:"Corte + barba",p:"9000",d:"45"},{n:"Diseño",p:"8000",d:"40"}];
+  var blocks=[{d:"Sáb 21 jun","r":"Día libre"},{d:"Lun 30 jun","r":"Vacaciones"}];
+  var gallery=[0,1,2,3,4,5];
+  var brand={name:"Fade Bros",color:"#D4AF37",ig:"@fadebros"};
+  var METRICS={
+    hoy:{entradas:48,reservas:39,efect:81,franjas:[["Mañana","9 a 13",22],["Tarde","13 a 18",55],["Noche","18 a 21",23]]},
+    semana:{entradas:342,reservas:267,efect:78,franjas:[["Mañana","9 a 13",28],["Tarde","13 a 18",47],["Noche","18 a 21",25]]},
+    mes:{entradas:1280,reservas:947,efect:74,franjas:[["Mañana","9 a 13",31],["Tarde","13 a 18",44],["Noche","18 a 21",25]]}
+  };
+  var st={tab:"metrics",period:"semana",barber:0};
+
+  function mono(t,size){size=size||40;return '<div style="width:'+size+'px;height:'+size+'px;border-radius:11px;flex:none;background:var(--s2);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-family:\'Bebas Neue\';font-size:'+(size/2.4)+'px;color:var(--gold2);letter-spacing:1px;">'+t+'</div>';}
+  function head_(){head.innerHTML=mono("FB",40)+'<div style="flex:1;"><div class="disp" style="font-size:21px;letter-spacing:1px;">'+brand.name.toUpperCase()+'</div><div class="lab" style="font-size:9px;color:var(--dim);">Panel del barbero</div></div><i class="ti ti-bell" style="font-size:20px;color:var(--dim);"></i>';}
+  function secTitle(t,btn){return '<div style="display:flex;align-items:center;justify-content:space-between;margin:2px 2px 14px;"><div class="disp" style="font-size:30px;">'+t+'</div>'+(btn||'')+'</div>';}
+  function addBtn(id){return '<button id="'+id+'" class="gbtn" style="padding:8px 13px;font-size:12px;"><i class="ti ti-plus"></i> Agregar</button>';}
+
+  function METRICS_VIEW(){
+    var m=METRICS[st.period],h='<div class="up">';
+    h+=secTitle("Métricas");
+    h+='<div style="display:flex;gap:8px;margin-bottom:16px;">';
+    [["hoy","Hoy"],["semana","Semana"],["mes","Mes"]].forEach(function(p){h+='<button class="pill period'+(st.period===p[0]?' on':'')+'" data-p="'+p[0]+'">'+p[1]+'</button>';});
+    h+='</div>';
+    h+='<div style="display:flex;gap:12px;margin-bottom:12px;">';
+    h+='<div class="card" style="flex:1;padding:15px;"><div class="lab" style="font-size:9px;color:var(--golddim);">Entraron al turnero</div><div class="disp" style="font-size:42px;color:var(--gold2);margin-top:4px;">'+m.entradas.toLocaleString("es-AR")+'</div><div style="font-size:10px;color:var(--dim);"><i class="ti ti-users" style="color:var(--gold);"></i> personas</div></div>';
+    h+='<div class="card" style="flex:1;padding:15px;"><div class="lab" style="font-size:9px;color:var(--golddim);">Efectividad reservas</div><div class="disp" style="font-size:42px;color:var(--gold2);margin-top:4px;">'+m.efect+'%</div><div class="hbar" style="margin-top:6px;"><div style="width:'+m.efect+'%;"></div></div></div>';
+    h+='</div>';
+    h+='<div style="font-size:10px;color:var(--dim);margin:0 2px 14px;"><i class="ti ti-info-circle"></i> '+m.reservas.toLocaleString("es-AR")+' reservas concretadas de '+m.entradas.toLocaleString("es-AR")+' visitas.</div>';
+    var max=Math.max.apply(null,m.franjas.map(function(f){return f[2];}));
+    h+='<div class="card" style="padding:16px;"><div class="lab" style="font-size:10px;color:var(--golddim);margin-bottom:14px;"><i class="ti ti-clock-hour-9" style="color:var(--gold);"></i> Franja horaria más fuerte</div>';
+    m.franjas.forEach(function(f){var top=f[2]===max;
+      h+='<div style="margin-bottom:13px;"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;"><span class="lab" style="font-size:11px;color:'+(top?'var(--gold2)':'var(--txt)')+';">'+f[0]+' <span style="color:var(--dim);font-size:9px;">('+f[1]+'hs)</span>'+(top?' <span style="color:#0a0805;background:var(--gold);padding:2px 7px;border-radius:10px;font-size:8px;margin-left:4px;">+FUERTE</span>':'')+'</span><span class="disp" style="font-size:20px;color:'+(top?'var(--gold2)':'var(--dim)')+';">'+f[2]+'%</span></div>';
+      h+='<div class="hbar" style="'+(top?'':'opacity:.55;')+'"><div style="width:'+Math.round(f[2]/max*100)+'%;"></div></div></div>';
+    });
+    h+='</div></div>';
+    screen.innerHTML=h;
+    Array.prototype.forEach.call(screen.querySelectorAll(".period"),function(el){el.addEventListener("click",function(){st.period=el.getAttribute("data-p");render();});});
+  }
+
+  function BARBEROS_VIEW(){
+    var h='<div class="up">'+secTitle("Barberos",addBtn("addB"));
+    barbers.forEach(function(b,i){
+      h+='<div class="card" style="padding:13px;margin-bottom:12px;">';
+      h+='<div style="display:flex;align-items:center;gap:11px;margin-bottom:11px;">'+mono(b.n.slice(0,2),42)+'<div style="flex:1;"><input data-bi="'+i+'" data-f="n" value="'+b.n+'" style="width:100%;font-weight:600;margin-bottom:5px;"><input data-bi="'+i+'" data-f="h" value="'+b.h+'" style="width:100%;font-size:12px;color:var(--dim);"></div></div>';
+      h+='<div style="display:flex;align-items:center;justify-content:space-between;border-top:1px solid var(--line);padding-top:11px;"><span class="lab" style="font-size:10px;color:var(--dim);">'+(b.on?'Activo y visible':'Oculto a clientes')+'</span><div style="display:flex;align-items:center;gap:14px;"><div class="sw'+(b.on?' on':'')+'" data-tog="'+i+'"></div><button data-del="'+i+'" style="color:#a33;font-size:19px;"><i class="ti ti-trash"></i></button></div></div>';
+      h+='</div>';
+    });
+    h+='</div>';screen.innerHTML=h;
+    wireInputs("bi",barbers);
+    Array.prototype.forEach.call(screen.querySelectorAll("[data-tog]"),function(el){el.addEventListener("click",function(){var i=+el.getAttribute("data-tog");barbers[i].on=!barbers[i].on;render();});});
+    Array.prototype.forEach.call(screen.querySelectorAll("[data-del]"),function(el){el.addEventListener("click",function(){barbers.splice(+el.getAttribute("data-del"),1);render();});});
+    document.getElementById("addB").addEventListener("click",function(){barbers.push({n:"Nuevo barbero",h:"especialidad",on:true,sc:sched()});render();});
+  }
+
+  function SERVICIOS_VIEW(){
+    var h='<div class="up">'+secTitle("Servicios",addBtn("addS"));
+    services.forEach(function(s,i){
+      h+='<div class="card" style="padding:13px;margin-bottom:12px;">';
+      h+='<div style="display:flex;align-items:center;gap:9px;margin-bottom:10px;"><i class="ti ti-scissors" style="color:var(--gold);font-size:18px;"></i><input data-si="'+i+'" data-f="n" value="'+s.n+'" style="flex:1;font-weight:600;"><button data-dels="'+i+'" style="color:#a33;font-size:18px;"><i class="ti ti-trash"></i></button></div>';
+      h+='<div style="display:flex;gap:10px;">';
+      h+='<div style="flex:1;"><div class="lab" style="font-size:8px;color:var(--golddim);margin-bottom:4px;">Precio $</div><input data-si="'+i+'" data-f="p" value="'+s.p+'" inputmode="numeric" style="width:100%;"></div>';
+      h+='<div style="flex:1;"><div class="lab" style="font-size:8px;color:var(--golddim);margin-bottom:4px;">Duración (min)</div><input data-si="'+i+'" data-f="d" value="'+s.d+'" inputmode="numeric" style="width:100%;"></div>';
+      h+='</div></div>';
+    });
+    h+='</div>';screen.innerHTML=h;
+    wireInputs("si",services);
+    Array.prototype.forEach.call(screen.querySelectorAll("[data-dels]"),function(el){el.addEventListener("click",function(){services.splice(+el.getAttribute("data-dels"),1);render();});});
+    document.getElementById("addS").addEventListener("click",function(){services.push({n:"Nuevo servicio",p:"0",d:"30"});render();});
+  }
+
+  function HORARIOS_VIEW(){
+    var b=barbers[st.barber]||barbers[0],h='<div class="up">'+secTitle("Horarios");
+    h+='<div style="display:flex;gap:8px;overflow-x:auto;margin-bottom:16px;padding-bottom:2px;scrollbar-width:none;">';
+    barbers.forEach(function(x,i){h+='<button class="pill barb'+(st.barber===i?' on':'')+'" data-b="'+i+'" style="flex:none;">'+x.n+'</button>';});
+    h+='</div>';
+    if(b){
+      h+='<div class="card" style="padding:6px 14px;margin-bottom:16px;">';
+      b.sc.forEach(function(d,i){
+        h+='<div style="display:flex;align-items:center;gap:10px;padding:9px 0;'+(i<6?'border-bottom:1px solid var(--line);':'')+'">';
+        h+='<div class="sw'+(d.on?' on':'')+'" data-day="'+i+'"></div><span class="lab" style="font-size:12px;width:34px;color:'+(d.on?'var(--txt)':'var(--dim)')+';">'+DAYS[i]+'</span>';
+        if(d.on){h+='<div style="flex:1;display:flex;align-items:center;gap:6px;justify-content:flex-end;"><input data-day="'+i+'" data-f="from" value="'+d.from+'" type="time" style="padding:6px 8px;font-size:12px;"><span style="color:var(--dim);">a</span><input data-day="'+i+'" data-f="to" value="'+d.to+'" type="time" style="padding:6px 8px;font-size:12px;"></div>';}
+        else{h+='<span style="flex:1;text-align:right;font-size:11px;color:var(--dim);">Descanso</span>';}
+        h+='</div>';
+      });
+      h+='</div>';
+    }
+    h+='<div style="display:flex;align-items:center;justify-content:space-between;margin:2px 2px 12px;"><div class="lab" style="font-size:11px;color:var(--golddim);"><i class="ti ti-calendar-off" style="color:var(--gold);"></i> Bloqueos / días libres</div>'+addBtn("addBl")+'</div>';
+    blocks.forEach(function(bl,i){h+='<div class="card" style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px;margin-bottom:10px;"><div><div style="font-family:\'Oswald\';font-weight:600;font-size:14px;">'+bl.d+'</div><div style="font-size:11px;color:var(--dim);">'+bl.r+'</div></div><button data-delbl="'+i+'" style="color:#a33;font-size:18px;"><i class="ti ti-x"></i></button></div>';});
+    h+='</div>';screen.innerHTML=h;
+    Array.prototype.forEach.call(screen.querySelectorAll(".barb"),function(el){el.addEventListener("click",function(){st.barber=+el.getAttribute("data-b");render();});});
+    Array.prototype.forEach.call(screen.querySelectorAll(".sw[data-day]"),function(el){el.addEventListener("click",function(){var i=+el.getAttribute("data-day");b.sc[i].on=!b.sc[i].on;render();});});
+    Array.prototype.forEach.call(screen.querySelectorAll("input[data-day]"),function(el){el.addEventListener("input",function(){b.sc[+el.getAttribute("data-day")][el.getAttribute("data-f")]=el.value;});});
+    Array.prototype.forEach.call(screen.querySelectorAll("[data-delbl]"),function(el){el.addEventListener("click",function(){blocks.splice(+el.getAttribute("data-delbl"),1);render();});});
+    document.getElementById("addBl").addEventListener("click",function(){blocks.push({d:"Nueva fecha","r":"Bloqueo"});render();});
+  }
+
+  function MARCA_VIEW(){
+    var h='<div class="up">'+secTitle("Marca");
+    h+='<div class="card" style="padding:16px;margin-bottom:16px;">';
+    h+='<div style="display:flex;align-items:center;gap:13px;margin-bottom:16px;">'+mono("FB",60)+'<div style="flex:1;"><div class="lab" style="font-size:9px;color:var(--golddim);margin-bottom:5px;">Logo</div><button class="pill" style="color:var(--gold2);border-color:var(--gold);"><i class="ti ti-upload"></i> Cambiar logo</button></div></div>';
+    h+='<div class="lab" style="font-size:9px;color:var(--golddim);margin-bottom:5px;">Nombre del local</div><input id="bname" value="'+brand.name+'" style="width:100%;margin-bottom:12px;">';
+    h+='<div class="lab" style="font-size:9px;color:var(--golddim);margin-bottom:5px;">Instagram</div><input id="big" value="'+brand.ig+'" style="width:100%;margin-bottom:12px;">';
+    h+='<div class="lab" style="font-size:9px;color:var(--golddim);margin-bottom:5px;">Color de marca</div><div style="display:flex;align-items:center;gap:11px;"><input id="bcolor" type="color" value="'+brand.color+'" style="width:50px;height:40px;padding:3px;"><span style="font-size:12px;color:var(--dim);">Cambia el dorado de toda la app del cliente.</span></div>';
+    h+='</div>';
+    h+='<div style="display:flex;align-items:center;justify-content:space-between;margin:2px 2px 12px;"><div class="lab" style="font-size:11px;color:var(--golddim);"><i class="ti ti-photo" style="color:var(--gold);"></i> Galería de cortes</div>'+addBtn("addG")+'</div>';
+    h+='<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:9px;">';
+    gallery.forEach(function(g,i){h+='<div style="position:relative;aspect-ratio:1;border-radius:10px;border:1px solid var(--line);background:linear-gradient(150deg,#241b0f,#0d0a06);overflow:hidden;"><div style="position:absolute;inset:0;background:repeating-linear-gradient(135deg,rgba(212,175,55,0.06) 0 8px,transparent 8px 16px);"></div><i class="ti ti-cut" style="position:absolute;top:8px;left:8px;color:var(--gold);font-size:14px;"></i><button data-delg="'+i+'" style="position:absolute;top:5px;right:5px;width:24px;height:24px;border-radius:50%;background:rgba(0,0,0,.6);color:#f2c;font-size:13px;"><i class="ti ti-x"></i></button></div>';});
+    h+='<button id="addG2" style="aspect-ratio:1;border-radius:10px;border:1px dashed var(--line);color:var(--gold2);display:flex;align-items:center;justify-content:center;font-size:24px;"><i class="ti ti-plus"></i></button>';
+    h+='</div></div>';screen.innerHTML=h;
+    document.getElementById("bname").addEventListener("input",function(){brand.name=this.value||"Local";head_();});
+    document.getElementById("big").addEventListener("input",function(){brand.ig=this.value;});
+    document.getElementById("bcolor").addEventListener("input",function(){brand.color=this.value;applyColor(this.value);});
+    Array.prototype.forEach.call(screen.querySelectorAll("[data-delg]"),function(el){el.addEventListener("click",function(){gallery.splice(+el.getAttribute("data-delg"),1);render();});});
+    var ag=function(){gallery.push(Date.now());render();};
+    document.getElementById("addG").addEventListener("click",ag);document.getElementById("addG2").addEventListener("click",ag);
+  }
+
+  function applyColor(c){var r=document.documentElement.style;r.setProperty("--gold",c);r.setProperty("--gold2",c);}
+  function wireInputs(attr,arr){Array.prototype.forEach.call(screen.querySelectorAll("input[data-"+attr+"]"),function(el){el.addEventListener("input",function(){arr[+el.getAttribute("data-"+attr)][el.getAttribute("data-f")]=el.value;});});}
+
+  var TABS=[["metrics","Métricas","chart-bar"],["barberos","Barberos","users"],["servicios","Servicios","scissors"],["horarios","Horarios","clock"],["marca","Marca","photo"]];
+  function navBar(){var h="";TABS.forEach(function(t){h+='<button class="'+(st.tab===t[0]?'on':'')+'" data-t="'+t[0]+'"><i class="ti ti-'+t[2]+'"></i>'+t[1]+'</button>';});nav.innerHTML=h;
+    Array.prototype.forEach.call(nav.querySelectorAll("button"),function(el){el.addEventListener("click",function(){st.tab=el.getAttribute("data-t");render();});});}
+
+  function render(){head_();navBar();screen.scrollTop=0;
+    ({metrics:METRICS_VIEW,barberos:BARBEROS_VIEW,servicios:SERVICIOS_VIEW,horarios:HORARIOS_VIEW,marca:MARCA_VIEW}[st.tab])();}
+  render();
+})();
+</script>
+</body>
+</html>
