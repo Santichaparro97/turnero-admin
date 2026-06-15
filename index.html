@@ -17,10 +17,10 @@
   #screen{flex:1;overflow-y:auto;scrollbar-width:none;padding:14px 16px 22px;}
   #screen::-webkit-scrollbar{display:none;}
   #nav{flex:none;display:flex;border-top:1px solid var(--line);background:#0c0a06;}
-  #nav button{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:9px 0 11px;color:var(--dim);font-size:9px;font-family:'Oswald';letter-spacing:1px;text-transform:uppercase;}
-  #nav button.on{color:var(--gold2);}
-  #nav button.on i{color:var(--gold);}
-  #nav i{font-size:21px;}
+  #nav button{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;padding:13px 0 16px;color:var(--dim);font-size:9px;font-family:'Oswald';letter-spacing:1px;text-transform:uppercase;transition:background .2s;}
+  #nav button.on{color:var(--gold2);background:rgba(212,175,55,0.08);box-shadow:inset 0 2px 0 var(--gold),0 0 16px rgba(212,175,55,0.22);}
+  #nav button.on i{color:var(--gold);text-shadow:0 0 10px rgba(212,175,55,0.9);}
+  #nav i{font-size:24px;}
   button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit;}
   input,select{font-family:'Inter';outline:none;background:var(--s1);border:1px solid var(--line);border-radius:9px;padding:10px 11px;color:var(--txt);font-size:14px;}
   input:focus,select:focus{border-color:var(--gold);}
@@ -62,6 +62,10 @@
   var blocks=[{d:"Sáb 21 jun","r":"Día libre"},{d:"Lun 30 jun","r":"Vacaciones"}];
   var gallery=[0,1,2,3,4,5];
   var brand={name:"Fade Bros",color:"#D4AF37",ig:"@fadebros"};
+  var turnos=[
+    {day:"Hoy · sáb 14",items:[{t:"10:30",c:"Santi",s:"Corte",b:"Tomás"},{t:"11:15",c:"Lucas",s:"Corte + barba",b:"Tomás"},{t:"15:00",c:"Maxi",s:"Diseño",b:"Joaco"},{t:"17:30",c:"Bruno",s:"Corte",b:"Nico"}]},
+    {day:"Mañana · dom 15",items:[{t:"12:00",c:"Fede",s:"Corte",b:"Nico"},{t:"16:30",c:"Juan",s:"Corte + barba",b:"Tomás"}]}
+  ];
   var METRICS={
     hoy:{entradas:48,reservas:39,efect:81,franjas:[["Mañana","9 a 13",22],["Tarde","13 a 18",55],["Noche","18 a 21",23]]},
     semana:{entradas:342,reservas:267,efect:78,franjas:[["Mañana","9 a 13",28],["Tarde","13 a 18",47],["Noche","18 a 21",25]]},
@@ -70,6 +74,8 @@
   var st={tab:"metrics",period:"semana",barber:0};
 
   function mono(t,size){size=size||40;return '<div style="width:'+size+'px;height:'+size+'px;border-radius:11px;flex:none;background:var(--s2);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-family:\'Bebas Neue\';font-size:'+(size/2.4)+'px;color:var(--gold2);letter-spacing:1px;">'+t+'</div>';}
+  function avatarEdit(b,i){var av=b.photo?'<div style="width:50px;height:50px;border-radius:12px;flex:none;background:linear-gradient(150deg,#2a2012,#0d0a06);border:1px solid var(--line);overflow:hidden;"><div style="width:100%;height:100%;background:repeating-linear-gradient(135deg,rgba(212,175,55,0.1) 0 7px,transparent 7px 14px);"></div></div>':mono(b.n.slice(0,2),50);
+    return '<div style="position:relative;flex:none;">'+av+'<button data-photo="'+i+'" aria-label="Subir foto" style="position:absolute;right:-5px;bottom:-5px;width:24px;height:24px;border-radius:50%;background:var(--gold);color:#0a0805;display:flex;align-items:center;justify-content:center;font-size:13px;border:2px solid var(--bg);"><i class="ti ti-camera"></i></button></div>';}
   function head_(){head.innerHTML=mono("FB",40)+'<div style="flex:1;"><div class="disp" style="font-size:21px;letter-spacing:1px;">'+brand.name.toUpperCase()+'</div><div class="lab" style="font-size:9px;color:var(--dim);">Panel del barbero</div></div><i class="ti ti-bell" style="font-size:20px;color:var(--dim);"></i>';}
   function secTitle(t,btn){return '<div style="display:flex;align-items:center;justify-content:space-between;margin:2px 2px 14px;"><div class="disp" style="font-size:30px;">'+t+'</div>'+(btn||'')+'</div>';}
   function addBtn(id){return '<button id="'+id+'" class="gbtn" style="padding:8px 13px;font-size:12px;"><i class="ti ti-plus"></i> Agregar</button>';}
@@ -96,23 +102,15 @@
     Array.prototype.forEach.call(screen.querySelectorAll(".period"),function(el){el.addEventListener("click",function(){st.period=el.getAttribute("data-p");render();});});
   }
 
-  function BARBEROS_VIEW(){
+  function LOCAL_VIEW(){
     var h='<div class="up">'+secTitle("Barberos",addBtn("addB"));
     barbers.forEach(function(b,i){
       h+='<div class="card" style="padding:13px;margin-bottom:12px;">';
-      h+='<div style="display:flex;align-items:center;gap:11px;margin-bottom:11px;">'+mono(b.n.slice(0,2),42)+'<div style="flex:1;"><input data-bi="'+i+'" data-f="n" value="'+b.n+'" style="width:100%;font-weight:600;margin-bottom:5px;"><input data-bi="'+i+'" data-f="h" value="'+b.h+'" style="width:100%;font-size:12px;color:var(--dim);"></div></div>';
+      h+='<div style="display:flex;align-items:center;gap:13px;margin-bottom:11px;">'+avatarEdit(b,i)+'<div style="flex:1;"><input data-bi="'+i+'" data-f="n" value="'+b.n+'" style="width:100%;font-weight:600;margin-bottom:5px;"><input data-bi="'+i+'" data-f="h" value="'+b.h+'" style="width:100%;font-size:12px;color:var(--dim);"></div></div>';
       h+='<div style="display:flex;align-items:center;justify-content:space-between;border-top:1px solid var(--line);padding-top:11px;"><span class="lab" style="font-size:10px;color:var(--dim);">'+(b.on?'Activo y visible':'Oculto a clientes')+'</span><div style="display:flex;align-items:center;gap:14px;"><div class="sw'+(b.on?' on':'')+'" data-tog="'+i+'"></div><button data-del="'+i+'" style="color:#a33;font-size:19px;"><i class="ti ti-trash"></i></button></div></div>';
       h+='</div>';
     });
-    h+='</div>';screen.innerHTML=h;
-    wireInputs("bi",barbers);
-    Array.prototype.forEach.call(screen.querySelectorAll("[data-tog]"),function(el){el.addEventListener("click",function(){var i=+el.getAttribute("data-tog");barbers[i].on=!barbers[i].on;render();});});
-    Array.prototype.forEach.call(screen.querySelectorAll("[data-del]"),function(el){el.addEventListener("click",function(){barbers.splice(+el.getAttribute("data-del"),1);render();});});
-    document.getElementById("addB").addEventListener("click",function(){barbers.push({n:"Nuevo barbero",h:"especialidad",on:true,sc:sched()});render();});
-  }
-
-  function SERVICIOS_VIEW(){
-    var h='<div class="up">'+secTitle("Servicios",addBtn("addS"));
+    h+='<div style="display:flex;align-items:center;justify-content:space-between;margin:24px 2px 14px;border-top:1px solid var(--line);padding-top:20px;"><div class="disp" style="font-size:30px;">Servicios</div>'+addBtn("addS")+'</div>';
     services.forEach(function(s,i){
       h+='<div class="card" style="padding:13px;margin-bottom:12px;">';
       h+='<div style="display:flex;align-items:center;gap:9px;margin-bottom:10px;"><i class="ti ti-scissors" style="color:var(--gold);font-size:18px;"></i><input data-si="'+i+'" data-f="n" value="'+s.n+'" style="flex:1;font-weight:600;"><button data-dels="'+i+'" style="color:#a33;font-size:18px;"><i class="ti ti-trash"></i></button></div>';
@@ -122,9 +120,29 @@
       h+='</div></div>';
     });
     h+='</div>';screen.innerHTML=h;
-    wireInputs("si",services);
+    wireInputs("bi",barbers);wireInputs("si",services);
+    Array.prototype.forEach.call(screen.querySelectorAll("[data-tog]"),function(el){el.addEventListener("click",function(){var i=+el.getAttribute("data-tog");barbers[i].on=!barbers[i].on;render();});});
+    Array.prototype.forEach.call(screen.querySelectorAll("[data-photo]"),function(el){el.addEventListener("click",function(){var i=+el.getAttribute("data-photo");barbers[i].photo=!barbers[i].photo;render();});});
+    Array.prototype.forEach.call(screen.querySelectorAll("[data-del]"),function(el){el.addEventListener("click",function(){barbers.splice(+el.getAttribute("data-del"),1);render();});});
     Array.prototype.forEach.call(screen.querySelectorAll("[data-dels]"),function(el){el.addEventListener("click",function(){services.splice(+el.getAttribute("data-dels"),1);render();});});
+    document.getElementById("addB").addEventListener("click",function(){barbers.push({n:"Nuevo barbero",h:"especialidad",on:true,sc:sched()});render();});
     document.getElementById("addS").addEventListener("click",function(){services.push({n:"Nuevo servicio",p:"0",d:"30"});render();});
+  }
+
+  function TURNOS_VIEW(){
+    var h='<div class="up">'+secTitle("Turnos");
+    h+='<div style="font-size:11px;color:var(--dim);margin:0 2px 16px;line-height:1.5;"><i class="ti ti-calendar-check" style="color:var(--gold);"></i> Agendas confirmadas. Tocá el WhatsApp para mandarle el recordatorio al cliente.</div>';
+    turnos.forEach(function(g){
+      h+='<div class="lab" style="font-size:10px;color:var(--golddim);margin:8px 2px 10px;">'+g.day+' · '+g.items.length+' turnos</div>';
+      g.items.forEach(function(it){
+        h+='<div class="card" style="display:flex;align-items:center;gap:12px;padding:11px 13px;margin-bottom:10px;">';
+        h+='<div class="disp" style="font-size:26px;color:var(--gold2);width:60px;flex:none;">'+it.t+'</div>';
+        h+='<div style="flex:1;min-width:0;"><div style="font-family:\'Oswald\';font-weight:600;font-size:15px;">'+it.c+'</div><div style="font-size:11px;color:var(--dim);">'+it.s+' · con '+it.b+'</div></div>';
+        h+='<button style="width:40px;height:40px;border-radius:10px;flex:none;background:#1FA855;color:#fff;font-size:19px;display:flex;align-items:center;justify-content:center;"><i class="ti ti-brand-whatsapp"></i></button>';
+        h+='</div>';
+      });
+    });
+    h+='</div>';screen.innerHTML=h;
   }
 
   function HORARIOS_VIEW(){
@@ -177,12 +195,12 @@
   function applyColor(c){var r=document.documentElement.style;r.setProperty("--gold",c);r.setProperty("--gold2",c);}
   function wireInputs(attr,arr){Array.prototype.forEach.call(screen.querySelectorAll("input[data-"+attr+"]"),function(el){el.addEventListener("input",function(){arr[+el.getAttribute("data-"+attr)][el.getAttribute("data-f")]=el.value;});});}
 
-  var TABS=[["metrics","Métricas","chart-bar"],["barberos","Barberos","users"],["servicios","Servicios","scissors"],["horarios","Horarios","clock"],["marca","Marca","photo"]];
+  var TABS=[["metrics","Métricas","chart-bar"],["local","Barbería","users"],["turnos","Turnos","calendar-check"],["horarios","Horarios","clock"],["marca","Marca","photo"]];
   function navBar(){var h="";TABS.forEach(function(t){h+='<button class="'+(st.tab===t[0]?'on':'')+'" data-t="'+t[0]+'"><i class="ti ti-'+t[2]+'"></i>'+t[1]+'</button>';});nav.innerHTML=h;
     Array.prototype.forEach.call(nav.querySelectorAll("button"),function(el){el.addEventListener("click",function(){st.tab=el.getAttribute("data-t");render();});});}
 
   function render(){head_();navBar();screen.scrollTop=0;
-    ({metrics:METRICS_VIEW,barberos:BARBEROS_VIEW,servicios:SERVICIOS_VIEW,horarios:HORARIOS_VIEW,marca:MARCA_VIEW}[st.tab])();}
+    ({metrics:METRICS_VIEW,local:LOCAL_VIEW,turnos:TURNOS_VIEW,horarios:HORARIOS_VIEW,marca:MARCA_VIEW}[st.tab])();}
   render();
 })();
 </script>
